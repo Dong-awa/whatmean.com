@@ -130,6 +130,17 @@
 <script>
 export default {
   name: 'EntryGenerator',
+  head() {
+    return {
+      title: '词条生成器 - 何意味.com',
+      meta: [
+        { name: 'description', content: '使用何意味.com词条生成器，提交你发现的新网络热梗，共同完善网络热梗百科。' },
+        { property: 'og:title', content: '词条生成器 - 何意味.com' },
+        { property: 'og:description', content: '提交你发现的新网络热梗，共同完善网络热梗百科。' },
+        { property: 'og:url', content: 'https://xn--vqqq8jxym.com/entry-generator' }
+      ]
+    }
+  },
   data() {
     return {
       entryData: {

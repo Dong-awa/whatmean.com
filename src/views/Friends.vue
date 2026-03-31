@@ -43,6 +43,17 @@ export default {
     LiquidGlassCard,
     LiquidGlassButton
   },
+  head() {
+    return {
+      title: '友情链接 - 何意味.com',
+      meta: [
+        { name: 'description', content: '何意味.com的友情链接，推荐优秀的合作伙伴网站。' },
+        { property: 'og:title', content: '友情链接 - 何意味.com' },
+        { property: 'og:description', content: '何意味.com推荐的优秀合作伙伴网站。' },
+        { property: 'og:url', content: 'https://xn--vqqq8jxym.com/friends' }
+      ]
+    }
+  },
   data() {
     return {
       friends: [

@@ -37,11 +37,24 @@
 </template>
 
 <script>
+import { useHead } from '@unhead/vue'
+
 export default {
   name: 'Index',
   data() {
     return {
       searchQuery: ''
+    }
+  },
+  head() {
+    return {
+      title: '何意味.com - 网络热梗百科，记录时代的网络文化符号',
+      meta: [
+        { name: 'description', content: '何意味.com致力于收集、整理和传播中国互联网上的各类热门梗、流行语和网络文化现象。搜索和浏览海量网络热梗。' },
+        { property: 'og:title', content: '何意味.com - 网络热梗百科' },
+        { property: 'og:description', content: '记录时代的网络文化符号。搜索和浏览海量网络热梗。' },
+        { property: 'og:url', content: 'https://xn--vqqq8jxym.com/' }
+      ]
     }
   },
   methods: {

@@ -101,10 +101,21 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { useHead } from '@unhead/vue';
 import entriesApi from '../services/api';
 import MorphModal from '../components/MorphModal.vue';
 
 const route = useRoute();
+
+useHead({
+  title: '网络热梗词条 - 何意味.com',
+  meta: [
+    { name: 'description', content: '浏览何意味.com收录的全部网络热梗词条，涵盖从早期经典到最新流行的各类网络文化符号。' },
+    { property: 'og:title', content: '网络热梗词条 - 何意味.com' },
+    { property: 'og:description', content: '浏览全部网络热梗词条，涵盖从早期经典到最新流行的各类网络文化符号。' },
+    { property: 'og:url', content: 'https://xn--vqqq8jxym.com/entries' }
+  ]
+});
 
 // 状态管理
 const entries = ref([]);
