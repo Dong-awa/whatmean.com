@@ -80,7 +80,7 @@ export default {
   height: 100vh;
   min-height: 500px;
   background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-              url('/background.png') center/cover no-repeat;
+              url('/background.webp') center/cover no-repeat;
   position: relative;
 }
 

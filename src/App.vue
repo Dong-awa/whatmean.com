@@ -27,7 +27,7 @@ import Footer from './components/Footer.vue'
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-image: url('/background.png');
+  background-image: url('/background.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
