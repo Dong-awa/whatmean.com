@@ -1257,12 +1257,13 @@
 
   window.attachLiquidPyramid = attachLiquidPyramid
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function once() {
-      document.removeEventListener('DOMContentLoaded', once)
-      attachLiquidPyramid()
-    })
-  } else {
-    attachLiquidPyramid()
-  }
+  // 默认不自动初始化，如需启用请手动调用 attachLiquidPyramid()
+  // if (document.readyState === 'loading') {
+  //   document.addEventListener('DOMContentLoaded', function once() {
+  //     document.removeEventListener('DOMContentLoaded', once)
+  //     attachLiquidPyramid()
+  //   })
+  // } else {
+  //   attachLiquidPyramid()
+  // }
 })()

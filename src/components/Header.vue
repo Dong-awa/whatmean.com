@@ -78,15 +78,18 @@ export default {
     },
     closeMobileMenu() {
       this.mobileMenuOpen = false;
-    }
-  },
-  mounted() {
-    // 监听窗口大小变化，当窗口变大时关闭移动端菜单
-    window.addEventListener('resize', () => {
+    },
+    handleResize() {
       if (window.innerWidth >= 768) {
         this.mobileMenuOpen = false;
       }
-    });
+    }
+  },
+  mounted() {
+    window.addEventListener('resize', this.handleResize);
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.handleResize);
   }
 }
 </script>
@@ -94,8 +97,8 @@ export default {
 <style scoped>
 .glass-header {
   background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.18);
   padding: 1rem 0;
   position: sticky;
@@ -107,8 +110,8 @@ export default {
 
 .glass-header:hover {
   background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
 }
 

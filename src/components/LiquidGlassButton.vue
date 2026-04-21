@@ -19,11 +19,11 @@ export default {
 <style scoped>
 .liquid-glass-btn {
   background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 18px;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.3s ease, background 0.3s ease;
   overflow: hidden;
   position: relative;
   cursor: pointer;
@@ -43,8 +43,8 @@ export default {
 
 .liquid-glass-btn-hover:hover {
   background: rgba(255, 255, 255, 0.6);
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .liquid-glass-btn-hover:hover::before {

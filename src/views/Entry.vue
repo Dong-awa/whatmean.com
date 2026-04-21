@@ -189,8 +189,8 @@ onMounted(() => {
 
 .liquid-glass-card {
   background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 
@@ -216,11 +216,8 @@ onMounted(() => {
 }
 
 .liquid-glass-card:hover {
-  transform: translateY(-10px) scale(1.03);
-  box-shadow: 
-    0 20px 50px rgba(31, 38, 135, 0.25),
-    inset 0 2px 15px rgba(255, 255, 255, 0.5),
-    inset 0 -2px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(31, 38, 135, 0.2);
 }
 
 .liquid-glass-card:hover::before {
@@ -247,21 +244,18 @@ onMounted(() => {
 
 .tag-badge {
   background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 20px;
   font-weight: 500;
   padding: 0.4em 1em;
   margin-bottom: 0.3rem;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 
-    0 2px 8px rgba(31, 38, 135, 0.1),
-    inset 0 1px 4px rgba(255, 255, 255, 0.4),
-    inset 0 -1px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, background 0.3s ease;
+  box-shadow: 0 2px 8px rgba(31, 38, 135, 0.1);
   position: relative;
   overflow: hidden;
-  color: #000; /* 默认黑色文字 */
+  color: #000;
 }
 
 .tag-badge::before {
@@ -277,14 +271,14 @@ onMounted(() => {
 }
 
 .tag-badge:hover {
-  background: rgba(102, 51, 153, 0.4); /* 紫色配色 */
+  background: rgba(102, 51, 153, 0.4);
   transform: translateY(-3px) scale(1.05);
   box-shadow: 
     0 6px 15px rgba(102, 51, 153, 0.2),
     inset 0 1px 8px rgba(255, 255, 255, 0.6),
     inset 0 -1px 8px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: #fff; /* 悬停时白色文字 */
 }
 
@@ -294,11 +288,11 @@ onMounted(() => {
 
 .liquid-glass-btn {
   background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 18px;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.3s ease;
   overflow: hidden;
   position: relative;
 }
@@ -317,8 +311,8 @@ onMounted(() => {
 
 .liquid-glass-btn:hover {
   background: rgba(255, 255, 255, 0.6);
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .liquid-glass-btn:hover::before {

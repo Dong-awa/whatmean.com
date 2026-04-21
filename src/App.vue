@@ -31,7 +31,7 @@ import Footer from './components/Footer.vue'
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
+  background-attachment: scroll;
 }
 
 .container-fluid {

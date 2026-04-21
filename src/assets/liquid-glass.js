@@ -287,6 +287,6 @@
     window.liquidGlass = shader;
   }
 
-  // Initialize
-  createLiquidGlass();
+  // 默认不自动初始化，如需启用请手动调用 createLiquidGlass()
+  // createLiquidGlass();
 })();

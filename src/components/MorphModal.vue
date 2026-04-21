@@ -93,8 +93,8 @@ export default {
 
 .morph-modal {
   background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 
@@ -214,8 +214,8 @@ export default {
 
 .tag-badge {
   background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 20px;
   font-weight: 500;
@@ -262,8 +262,8 @@ export default {
 
 .liquid-glass-btn {
   background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 18px;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
