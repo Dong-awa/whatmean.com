@@ -176,6 +176,7 @@ const showEntryDetail = (entry, event) => {
         padding: s.padding,
         margin: s.margin,
         borderRadius: s.borderRadius,
+        lineHeight: s.lineHeight,
         display: s.display,
         width: s.width,
         height: s.height

@@ -247,7 +247,7 @@ export default {
           willChange: 'transform, border-radius',
           opacity: '1'
         }
-        await this._wait(400)
+        await this._wait(200)
         this.contentVisible = true
         this.panelStyle = { ...this.panelStyle, willChange: 'auto' }
       } else {
@@ -268,7 +268,7 @@ export default {
           opacity: '1'
         }
         /* 等待时间须 >= transition 时长，防止内容淡入时面板仍在位移 */
-        await this._wait(520)
+        await this._wait(280)
         this.contentVisible = true
       }
     },
@@ -412,7 +412,7 @@ export default {
   padding: 20px 24px 80px;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.22s ease;
+  transition: opacity 0.12s ease;
 }
 .cex-content--show {
   opacity: 1;

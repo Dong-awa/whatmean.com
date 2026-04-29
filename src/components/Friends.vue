@@ -164,6 +164,7 @@ export default {
         ...friend, 
         clonedHtml: cardContent,
         deepStyles: {
+          // 修正选择器：与模板实际类名对齐
           icon: getDeepStyles('.friend-card-icon'),
           name: getDeepStyles('.friend-card-name'),
           desc: getDeepStyles('.friend-card-desc'),

@@ -16,10 +16,11 @@
       :style="panelStyle"
       @click.stop
     >
-      <!-- 内容：展开完成后淡入，关闭前淡出 -->
+      <!-- 内容区 -->
       <div
         class="cex-content"
         :class="{ 'cex-content--show': contentVisible }"
+        :style="contentStyle"
       >
         <!-- 顶部栏：徽章左 + 关闭按钮右 -->
         <div class="cex-topbar">
@@ -72,12 +73,25 @@
             >{{ tag.trim() }}</span>
           </div>
         </div>
-
       </div>
 
-      <!-- 底部关闭按钮：固定在面板右下角，不随内容滚动 -->
-      <div v-if="contentVisible" class="cex-footer">
+      <!-- 底部关闭按钮：只在详情展开且非关闭动画期间显示 -->
+      <div v-if="contentVisible && !isClosing" class="cex-footer">
         <button class="btn liquid-glass-btn" @click="closeModal">关闭</button>
+      </div>
+
+      <!-- 关闭动画时显示的卡片简略内容层（与详情层交叉淡入） -->
+      <div
+        class="cex-card-view"
+        :style="cardViewStyle"
+      >
+        <div 
+          ref="clonedContainer"
+          class="cex-card-view-inner" 
+          :style="{ width: '100%', height: '100%' }"
+          v-html="cardRect?.clonedHtml"
+        >
+        </div>
       </div>
     </div>
   </Teleport>
@@ -98,25 +112,88 @@ export default {
       rendered:       false,
       overlayActive:  false,
       contentVisible: false,
+      isClosing:      false,
       panelStyle:     {},
+      contentStyle:   {},
+      cardViewStyle:  { opacity: '0', pointerEvents: 'none' },
       _timers:        []
     }
   },
   watch: {
     isVisible(v) { v ? this._open() : this._close() }
   },
-  mounted() {
-    if (this.isVisible) this._open()
+  updated() {
+    // 每次克隆内容更新后，强制应用深度抓取的精确像素样式
+    this.$nextTick(() => {
+      this._applyDeepStyles();
+    });
   },
-  beforeUnmount() { this._clearTimers() },
   methods: {
+    _applyDeepStyles() {
+      const container = this.$refs.clonedContainer;
+      const styles = this.cardRect?.deepStyles;
+      if (!container || !styles) return;
+
+      // 1. 强制对齐 Body Padding
+      const body = container.querySelector('.card-body');
+      if (body && styles.body) {
+        body.style.setProperty('padding', styles.body.padding, 'important');
+        Object.assign(body.style, {
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%'
+        });
+      }
+
+      // 2. 强制对齐标题和正文
+      const title = container.querySelector('.card-title');
+      if (title && styles.title) {
+        title.style.setProperty('font-size', styles.title.fontSize, 'important');
+        title.style.setProperty('line-height', styles.title.lineHeight, 'important');
+        title.style.setProperty('margin', styles.title.margin, 'important');
+        title.style.setProperty('font-weight', styles.title.fontWeight, 'important');
+        title.style.setProperty('color', styles.title.color, 'important');
+      }
+
+      const text = container.querySelector('.card-text');
+      if (text && styles.text) {
+        text.style.setProperty('font-size', styles.text.fontSize, 'important');
+        text.style.setProperty('line-height', styles.text.lineHeight, 'important');
+        text.style.setProperty('margin', styles.text.margin, 'important');
+        text.style.setProperty('color', styles.text.color, 'important');
+        Object.assign(text.style, {
+          display: '-webkit-box',
+          webkitLineClamp: '3',
+          webkitBoxOrient: 'vertical',
+          overflow: 'hidden'
+        });
+      }
+
+      // 3. 强制对齐每一个标签的绝对像素尺寸
+      const tags = container.querySelectorAll('.tag-badge');
+      tags.forEach((tag, i) => {
+        const s = styles.tagStyles[i];
+        if (s) {
+          Object.assign(tag.style, {
+            fontSize: s.fontSize,
+            padding: s.padding,
+            margin: s.margin,
+            borderRadius: s.borderRadius,
+            lineHeight: s.lineHeight,
+            width: s.width,
+            height: s.height,
+            display: s.display,
+            transition: 'none'
+          });
+        }
+      });
+    },
     closeModal() { this.$emit('close') },
     _clearTimers() { this._timers.forEach(clearTimeout); this._timers = [] },
     _wait(ms) {
       return new Promise(r => { const id = setTimeout(r, ms); this._timers.push(id) })
     },
 
-    /* 获取卡片当前视口坐标（每次实时获取，避免滚动后错位） */
     _getCardRect() {
       if (this.activeCardEl) {
         const el = this.activeCardEl
@@ -124,7 +201,6 @@ export default {
         const origTransform  = el.style.transform
         el.style.transition = 'none'
         el.style.transform  = 'none'
-        el.getBoundingClientRect()
         const r = el.getBoundingClientRect()
         el.style.transform  = origTransform
         el.style.transition = origTransition
@@ -138,12 +214,12 @@ export default {
       }
     },
 
-    /* 目标全屏尺寸 */
     _targetRect() {
       const vw = window.innerWidth
       const vh = window.innerHeight
       if (vw <= 768) {
-        return { left: 0, top: 12, width: vw, height: vh - 24, radius: 20 }
+        // 手机端：全屏感但保留微小边距，圆角与卡片一致
+        return { left: 8, top: 8, width: vw - 16, height: vh - 16, radius: 24 }
       }
       const maxW = Math.min(800, vw - 40)
       const maxH = Math.min(vh * 0.92, vh - 40)
@@ -168,15 +244,12 @@ export default {
 
     _morphTransition(dur) {
       return ['left','top','width','height','border-radius']
-        .map(p => `${p} ${dur}s cubic-bezier(0.32,0.72,0,1)`)
+        .map(p => `${p} ${dur}s cubic-bezier(0.32, 0.72, 0, 1)`)
         .join(',')
     },
 
-    /* 手机端：用 transform scale+translate 计算从卡片到全屏的变换 */
     _isMobile() { return window.innerWidth <= 768 },
 
-    /* 手机端面板固定为全屏，用 transform 做缩放动画 */
-    /* 手机端：计算 transform 参数和 clip-path inset 圆角 */
     _calcMobileTransform(src, dst) {
       const scaleX = src.width  / dst.width
       const scaleY = src.height / dst.height
@@ -185,9 +258,9 @@ export default {
       return { scaleX, scaleY, tx, ty }
     },
 
+
+
     _lockScroll() {
-      /* 不使用 overflow:hidden（会覆盖 CSS 的 scrollbar-gutter:stable，导致右侧抖动）
-         改为通过事件拦截阻止滚动，布局完全不受影响 */
       document.addEventListener('wheel', this._preventScroll, { passive: false })
       document.addEventListener('keydown', this._preventKeyScroll)
       if (this._isMobile()) {
@@ -201,9 +274,7 @@ export default {
         window.removeEventListener('touchmove', this._preventScroll)
       }
     },
-    _preventScroll(e) {
-      e.preventDefault()
-    },
+    _preventScroll(e) { e.preventDefault() },
     _preventKeyScroll(e) {
       const scrollKeys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' ']
       if (scrollKeys.includes(e.key)) e.preventDefault()
@@ -213,18 +284,18 @@ export default {
       this._clearTimers()
       this.contentVisible = false
       this.overlayActive  = false
+      this.cardViewStyle  = { opacity: '0', pointerEvents: 'none' } // 重置克隆层，防止快速打断残留
       this._lockScroll()
 
       const src = this._getCardRect()
       const dst = this._targetRect()
 
       if (this._isMobile()) {
-        /* 手机端：面板固定全屏尺寸，用 transform 从卡片缩放展开
-           border-radius 用补偿值：初始圆角 = 卡片圆角 / scale，这样缩放后视觉圆角和卡片一致 */
         const { scaleX, scaleY, tx, ty } = this._calcMobileTransform(src, dst)
         const srcRadius = src.radius ?? 24
         const dstRadius = dst.radius ?? 20
-        // 直接用卡片圆角值，不做补偿计算
+
+        this.contentStyle = { opacity: '0', transition: 'none' }
         this.panelStyle = {
           ...this._toStyle(dst),
           borderRadius: `${srcRadius}px`,
@@ -248,11 +319,24 @@ export default {
           willChange: 'transform, border-radius',
           opacity: '1'
         }
-        await this._wait(400)
+        this.contentStyle = {
+          opacity: '1',
+          transition: 'opacity 0.35s cubic-bezier(0.32,0.72,0,1)'
+        }
         this.contentVisible = true
+        await this._wait(460)
         this.panelStyle = { ...this.panelStyle, willChange: 'auto' }
+        this.contentStyle = {}
       } else {
-        /* 桌面端：原有 left/top/width/height 过渡 */
+        const scaleX0 = src.width  / dst.width
+        const scaleY0 = src.height / dst.height
+
+        this.contentStyle = {
+          transform: `scale(${scaleX0}, ${scaleY0})`,
+          transformOrigin: 'top left',
+          opacity: '0',
+          transition: 'none'
+        }
         this.panelStyle = {
           ...this._toStyle(src),
           transition: 'none',
@@ -263,91 +347,99 @@ export default {
         await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
 
         this.overlayActive = true
+        const dur = 0.50
         this.panelStyle = {
           ...this._toStyle(dst),
-          transition: this._morphTransition(0.50),
+          transition: this._morphTransition(dur),
           opacity: '1'
         }
-        /* 等待时间须 >= transition 时长，防止内容淡入时面板仍在位移 */
-        await this._wait(520)
+        this.contentStyle = {
+          transform: 'scale(1, 1)',
+          transformOrigin: 'top left',
+          opacity: '1',
+          transition: `transform ${dur}s cubic-bezier(0.32,0.72,0,1), opacity ${dur * 0.8}s cubic-bezier(0.32,0.72,0,1)`
+        }
         this.contentVisible = true
+        await this._wait(Math.round(dur * 1000) + 20)
+        this.contentStyle = {}
       }
     },
 
     async _close() {
       if (!this.rendered) return
       this._clearTimers()
+      this.isClosing = true
 
-      /* Step 1：内容淡出 */
-      this.contentVisible = false
-      await this._wait(150)
+      const src = this._getCardRect()
+      const dst = this._targetRect()
 
       if (this._isMobile()) {
-        const src = this._getCardRect()
-        const dst = this._targetRect()
+        // ===== 手机端：与桌面端相同，使用 left/top/width/height 形变收缩回卡片 =====
+        // 避免 scale(scaleX, scaleY) 因宽高比差异导致面板被压扁
+        const dur = 0.45
+
+        this._unlockScroll()
         this.overlayActive = false
-        /* 手机端：transform 缩回卡片，border-radius 用补偿值 */
-        const { scaleX, scaleY, tx, ty } = this._calcMobileTransform(src, dst)
-        const srcRadius = src.radius ?? 24
-        const dstRadius = dst.radius ?? 20
+
+        // 详情层淡出，卡片层淡入（交叉淡入）
+        this.contentStyle = {
+          opacity: '0',
+          transition: `opacity ${dur * 0.5}s cubic-bezier(0.32,0.72,0,1)`
+        }
+        this.cardViewStyle = {
+          opacity: '1',
+          pointerEvents: 'none',
+          transition: `opacity ${dur * 0.5}s cubic-bezier(0.32,0.72,0,1)`
+        }
+
+        // 面板形变收缩，全程 opacity:1
         this.panelStyle = {
-          ...this._toStyle(dst),
-          borderRadius: `${dstRadius}px`,
-          transform: 'translate3d(0, 0, 0) scale(1, 1)',
-          transformOrigin: 'center center',
-          transition: 'none',
-          willChange: 'transform, opacity',
+          ...this._toStyle(src),
+          transition: this._morphTransition(dur),
           opacity: '1'
         }
-        await this.$nextTick()
-        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
-        this.panelStyle = {
-          ...this._toStyle(dst),
-          borderRadius: `${srcRadius}px`,
-          transform: `translate3d(${tx}px, ${ty}px, 0) scale(${scaleX}, ${scaleY})`,
-          transformOrigin: 'center center',
-          transition: `transform 0.38s cubic-bezier(0.32,0.72,0,1), border-radius 0.38s cubic-bezier(0.32,0.72,0,1)`,
-          willChange: 'transform'
-        }
-        await this._wait(360)
-        this.$emit('card-reveal')
-        this.panelStyle = {
-          ...this._toStyle(dst),
-          borderRadius: `${srcRadius}px`,
-          transform: `translate(${tx}px, ${ty}px) scale(${scaleX}, ${scaleY})`,
-          transformOrigin: 'center center',
-          transition: 'opacity 0.22s ease',
-          opacity: '0'
-        }
-        await this._wait(240)
-        this._unlockScroll()
-        this.rendered   = false
-        this.panelStyle = {}
-      } else {
-        /* 桌面端：先解锁滚动，让 scrollbar 复原后再测量卡片的"最终位置"。
-           此时 panel 仍覆盖屏幕，用户无感。
-           这样面板收缩的终点 = 卡片实际出现的位置，消除抽搐。 */
-        this._unlockScroll()
-        await new Promise(r => requestAnimationFrame(r))
 
-        const src = this._getCardRect()
+        await this._wait(Math.round(dur * 1000) + 30)
+
+        this.$emit('card-reveal')
+        this.rendered      = false
+        this.isClosing     = false
+        this.panelStyle    = {}
+        this.contentStyle  = {}
+        this.cardViewStyle = { opacity: '0', pointerEvents: 'none' }
+      } else {
+        // ===== 桌面端：position 形变收缩回卡片 =====
+        this._unlockScroll()
+        const dur = 0.50
+
         this.overlayActive = false
 
+        // 详情层淡出，卡片层淡入（交叉淡入）
+        this.contentStyle = {
+          opacity: '0',
+          transition: `opacity ${dur * 0.5}s cubic-bezier(0.32,0.72,0,1)`
+        }
+        this.cardViewStyle = {
+          opacity: '1',
+          pointerEvents: 'none',
+          transition: `opacity ${dur * 0.5}s cubic-bezier(0.32,0.72,0,1)`
+        }
+
+        // 面板形变收缩，全程 opacity:1
         this.panelStyle = {
           ...this._toStyle(src),
-          transition: this._morphTransition(0.40)
+          transition: this._morphTransition(dur),
+          opacity: '1'
         }
-        /* 等待时间须 >= transition 时长，否则中途换 transition 会弹跳 */
-        await this._wait(420)
+
+        await this._wait(Math.round(dur * 1000) + 30)
+
         this.$emit('card-reveal')
-        this.panelStyle = {
-          ...this._toStyle(src),
-          transition: 'opacity 0.22s ease',
-          opacity: '0'
-        }
-        await this._wait(240)
-        this.rendered   = false
-        this.panelStyle = {}
+        this.rendered      = false
+        this.isClosing     = false
+        this.panelStyle    = {}
+        this.contentStyle  = {}
+        this.cardViewStyle = { opacity: '0', pointerEvents: 'none' }
       }
     }
   }
@@ -379,32 +471,33 @@ export default {
 .cex-panel {
   position: fixed;
   z-index: 3000;
-  /* overflow:hidden 防止内容在面板尺寸小时溢出（展开初始阶段） */
   overflow: hidden;
-  /* 与原卡片完全一致的毛玻璃样式 */
-  /* 稍微加深背景色，防止手机端动画中 backdrop-filter 闪烁时完全透明 */
-  background: rgba(15, 23, 42, 0.5); 
+  background: rgba(0, 0, 0, 0.30);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  /* 阴影与全局 style.css 中 .meme-card/.liquid-glass-card 严格一致 */
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow:
-    rgba(0, 0, 0, 0.18) 0px 8px 32px 0px,
-    rgba(255, 255, 255, 0.30) 0px 1px 0px 0px inset,
-    rgba(255, 255, 255, 0.05) 0px -1px 0px 0px inset;
-  will-change: transform, opacity;
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  will-change: left, top, width, height, border-radius, opacity;
+  transform-origin: center center;
 }
 
-/* 顶部高光线 */
+/* 顶部高光线 —— 与 style.css 中 .meme-card::before 严格一致 */
 .cex-panel::before {
   content: '';
   position: absolute;
-  top: 0; left: 8%; right: 8%;
+  top: 0; left: 10%; right: 10%;
   height: 1px;
-  background: linear-gradient(90deg,
+  background: linear-gradient(
+    90deg,
     transparent,
-    rgba(255,255,255,0.55) 30%,
-    rgba(255,255,255,0.55) 70%,
-    transparent);
+    rgba(255, 255, 255, 0.55) 30%,
+    rgba(255, 255, 255, 0.55) 70%,
+    transparent
+  );
   pointer-events: none;
   z-index: 1;
 }
@@ -413,12 +506,11 @@ export default {
 .cex-content {
   position: absolute;
   inset: 0;
+  z-index: 2; /* 内容层始终在克隆层之上，确保关闭按钮可点击 */
   overflow-y: auto;
-  /* 底部留出空间给固定关闭按钮 */
   padding: 20px 24px 80px;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.22s ease;
 }
 .cex-content--show {
   opacity: 1;
@@ -449,7 +541,7 @@ export default {
   flex-shrink: 0;
 }
 
-/* ===== 关闭按钮（在 topbar 内，不再 absolute 避免与年份重叠） ===== */
+/* ===== 关闭按钮 ===== */
 .cex-close {
   width: 32px;
   height: 32px;
@@ -539,15 +631,13 @@ export default {
 }
 .cex-tag:hover { background: rgba(255,255,255,0.22); }
 
-/* ===== 底部关闭按钮：固定在卡片右下角 ===== */
+/* ===== 底部关闭按钮 ===== */
 .cex-footer {
   position: absolute;
   bottom: 20px;
   right: 24px;
   z-index: 10;
 }
-
-/* 关闭按钮玻璃样式 */
 .cex-footer .liquid-glass-btn {
   background: rgba(255, 255, 255, 0.10);
   backdrop-filter: blur(12px);
@@ -571,8 +661,92 @@ export default {
 
 /* ===== 移动端 ===== */
 @media (max-width: 768px) {
-  .cex-content { padding: 16px 16px 24px; }
-  .cex-title   { font-size: 1.5rem; }
-  .cex-desc    { font-size: 0.92rem; }
+  .cex-content { padding: 20px 20px 30px; }
+  .cex-title   { font-size: 1.75rem; }
+  .cex-desc    { font-size: 1rem; }
+  /* 手机端预览层适配：确保克隆的内容能正确换行 */
+  .cex-card-view-inner :deep(.card-body) {
+    padding: 1.5rem !important;
+  }
+  .cex-card-view-inner :deep(.card-title) {
+    font-size: 1.25rem !important;
+    color: #ffffff !important;
+    margin: 0.5rem 0 !important;
+  }
+  .cex-card-view-inner :deep(.card-text) {
+    /* 移除硬编码，由 _applyDeepStyles 动态应用原卡片的 fontSize 和 lineHeight */
+    color: rgba(255, 255, 255, 0.80) !important;
+  }
+}
+
+/* ===== 卡片视图层（关闭动画时显示） ===== */
+.cex-card-view {
+  position: absolute;
+  inset: 0;
+  z-index: 1; /* 克隆层在内容层之下 */
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.cex-card-view-inner {
+  height: 100%;
+  width: 100%;
+  pointer-events: none;
+  /* 强制清除自身的所有边框和阴影，避免与外层 cex-panel 叠加导致双重高光 */
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  transform: none;
+  overflow: hidden;
+  display: block;
+  position: relative;
+}
+/* 同时清除自身的 ::before 高光线 */
+.cex-card-view-inner::before {
+  display: none !important;
+}
+/* 预览层内部克隆内容移除阴影和边框，避免与外层面板重叠导致加深或闪烁 */
+.cex-card-view-inner :deep(.liquid-glass-card),
+.cex-card-view-inner :deep(.meme-card) {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  margin: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+.cex-card-view-inner :deep(.liquid-glass-card::before),
+.cex-card-view-inner :deep(.meme-card::before) {
+  display: none !important;
+}
+/* 深度作用于克隆的 HTML 内容 */
+.cex-card-view-inner :deep(.card-body) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+/* 克隆方案下，预览层会直接继承 .liquid-glass-card 及其子类的样式 */
+.cex-card-view-inner :deep(.card-title) {
+  color: #ffffff;
+}
+/* 年份文字：scoped 样式无法作用于 v-html 克隆内容，需在此强制覆盖 Bootstrap .text-muted 的深色默认值 */
+.cex-card-view-inner :deep(.text-muted),
+.cex-card-view-inner :deep(small) {
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+.cex-card-view-inner :deep(.card-text) {
+  color: rgba(255, 255, 255, 0.80);
+  /* 确保预览层文字不溢出，保持 3 行截断 */
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+.cex-card-view-inner :deep(.tag-badge) {
+  /* 仅禁用过渡和强制 inline-block，尺寸类属性全部交由 _applyDeepStyles() 的 inline style 控制 */
+  /* 避免用 !important 覆盖 inline style，否则实际像素尺寸与原卡片不一致 */
+  transition: none !important;
+  display: inline-block !important;
 }
 </style>
