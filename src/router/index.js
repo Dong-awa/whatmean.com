@@ -3,6 +3,7 @@ import Index from '../views/Index.vue'
 import Entry from '../views/Entry.vue'
 import About from '../views/About.vue'
 import Friends from '../views/Friends.vue'
+import Freebies from '../views/Freebies.vue'
 import EntryGenerator from '../views/EntryGenerator.vue'
 
 const routes = [
@@ -30,6 +31,11 @@ const routes = [
     path: '/friends',
     name: 'Friends',
     component: Friends
+  },
+  {
+    path: '/freebies',
+    name: 'Freebies',
+    component: Freebies
   }
 ]
 

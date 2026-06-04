@@ -21,6 +21,9 @@
               <li class="nav-item">
                 <router-link class="nav-link" to="/friends">友情链接</router-link>
               </li>
+              <li class="nav-item">
+                <router-link class="nav-link" to="/freebies">最新羊毛</router-link>
+              </li>
             </ul>
           </nav>
           
@@ -58,6 +61,9 @@
             </li>
             <li class="nav-item">
               <router-link class="nav-link mobile-nav-link" to="/friends" @click="closeMobileMenu">友情链接</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link class="nav-link mobile-nav-link" to="/freebies" @click="closeMobileMenu">最新羊毛</router-link>
             </li>
           </ul>
         </div>
