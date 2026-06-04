@@ -97,7 +97,7 @@ git checkout
 ```bash
 git clone --filter=blob:none --sparse https://github.com/Nico6719/whatmean.com.git
 cd whatmean.com
-git sparse-checkout set --no-cone src public package.json package-lock.json vite.config.js README.md DEVELOPMENT_GUIDE.md API_DOCUMENTATION.md
+git sparse-checkout set --no-cone src public package.json pnpm-lock.yaml vite.config.js README.md DEVELOPMENT_GUIDE.md API_DOCUMENTATION.md
 ```
 
 使用这些技术，您可以避免下载大量的词条文件，从而显著减少克隆时间和磁盘占用。
@@ -113,17 +113,17 @@ git sparse-checkout set --no-cone src public package.json package-lock.json vite
 
 2. 安装依赖：
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. 启动开发服务器：
    ```bash
-   npm run dev
+   pnpm dev
    ```
 
 4. 构建生产版本：
    ```bash
-   npm run build
+   pnpm build
    ```
 
 ### 联系我们
